@@ -1,4 +1,5 @@
-FROM tomcat:9-jre8-alpine
+FROM tomcat:9-jre8-alpine as base
+WORKDIR /app
 
 RUN apk --update add curl ca-certificates tar 
 RUN set -x \
@@ -11,18 +12,21 @@ RUN set -x \
     && mv /home/mysql/mysql-connector-java-5.1.40/mysql-connector-java-5.1.40-bin.jar /usr/share/java/mysql-connector-java.jar \
     && cd /home \
     && rm -R *
+    RUN export CLASSPATH=$CLASSPATH:/usr/share/java/mysql-connector-java.jar
 
-RUN pwd
+FROM tomcat:9-jre8-alpine AS maven
+WORKDIR ./
+COPY . .
 RUN chmod +x ./mvnw
 RUN sed -i 's/\r$//' mvnw
 RUN ./mvnw install
 
+FROM maven as build
 WORKDIR ./
 RUN ./mvnw package
 
-RUN export CLASSPATH=$CLASSPATH:/usr/share/java/mysql-connector-java.jar
-
-RUN rm -rf /usr/local/tomcat/webapps/ROOT
-
-ADD ./target/ROOT.war /usr/local/tomcat/webapps/
-
+FROM base as final
+WORKDIR /app
+COPY --from=build /target/ROOT.war /usr/local/tomcat/webapps/
+EXPOSE 8080
+ENTRYPOINT exec java -Djava.security.egd=file:/dev/./urandom -jar /app/ROOT.war
