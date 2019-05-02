@@ -12,6 +12,13 @@ RUN set -x \
     && cd /home \
     && rm -R *
 
+RUN chmod +x ./mvnw
+RUN sed -i 's/\r$//' mvnw
+RUN ./mvnw install
+
+WORKDIR ./
+RUN ./mvnw package
+
 RUN export CLASSPATH=$CLASSPATH:/usr/share/java/mysql-connector-java.jar
 
 RUN rm -rf /usr/local/tomcat/webapps/ROOT
