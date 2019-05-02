@@ -12,6 +12,7 @@ RUN set -x \
     && cd /home \
     && rm -R *
 
+RUN pwd
 RUN chmod +x ./mvnw
 RUN sed -i 's/\r$//' mvnw
 RUN ./mvnw install
