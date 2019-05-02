@@ -17,3 +17,5 @@ RUN export CLASSPATH=$CLASSPATH:/usr/share/java/mysql-connector-java.jar
 RUN rm -rf /usr/local/tomcat/webapps/ROOT
 
 ADD ./target/ROOT.war /usr/local/tomcat/webapps/
+
+EXPOSE 8080
